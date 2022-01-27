@@ -5,13 +5,15 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon"
   },
   "author": "Animesh Chandra",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.2",
     "express-validator": "^6.14.0",
+    "gravatar": "^1.8.2",
     "mongoose": "^6.1.8"
   },
   "devDependencies": {
