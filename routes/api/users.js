@@ -2,6 +2,8 @@ const express = require('express');
 const { check, validationResult } = require('express-validator');
 const gravatar = require('gravatar/lib/gravatar');
 const bcrpyt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 const User = require('../../models/User');
 
 const router = express();
@@ -9,7 +11,7 @@ router.post(
   '/',
   [
     check('name', 'Name is required').not().isEmpty(),
-    check('email', 'please enter valid email').isEmail(),
+    check('email', 'Please enter valid email').isEmail(),
     check('password', 'password should be more than 6 char').isLength({
       min: 6,
     }),
@@ -28,7 +30,7 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: 'User is already exists' }] });
+          .json({ error: [{ msg: 'User is already exists' }] });
       }
 
       // Set gravatar
@@ -49,8 +51,25 @@ router.post(
       const salt = await bcrpyt.genSalt(10);
       user.password = await bcrpyt.hash(password, salt);
 
+      // Save data into DATABASE
       await user.save();
-      res.send('User Registered !!');
+
+      // JWT token
+      const payload = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      jwt.sign(
+        payload,
+        config.get('JWTSECRET'),
+        { expiresIn: 360000 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server error');
